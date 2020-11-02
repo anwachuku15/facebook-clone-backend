@@ -7,8 +7,8 @@ import Grid from "gridfs-stream";
 import bodyParser from "body-parser";
 import path from "path";
 import Pusher from "pusher";
-
-import mongoPosts from "./postModel";
+import { mongoURI as mURI } from "./secrets.js";
+import mongoPosts from "./postModel.js";
 
 Grid.mongo = mongoose.mongo;
 // app config
@@ -20,8 +20,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // db config
-const mongoURI =
-  "mongodb+srv://fbclient:FvE4BMgvFLS9jSR@cluster0.hvdbe.mongodb.net/facebook-clone-db?retryWrites=true&w=majority";
+const mongoURI = mURI;
 
 // For GridFS
 const connection = mongoose.createConnection(mongoURI, {
