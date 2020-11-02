@@ -18,9 +18,54 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // db config
+const mongoURI =
+  "mongodb+srv://fbclient:FvE4BMgvFLS9jSR@cluster0.hvdbe.mongodb.net/facebook-clone-db?retryWrites=true&w=majority";
+
+// For GridFS
+const connection = mongoose.createConnection(mongoURI, {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+let gfs;
+
+connection.once("open", () => {
+  console.log("db connection");
+  gfs = Grid(connection.db, mongoose.mongo);
+  gfs.collection("images");
+});
+
+const storage = new GridFsStorage({
+  url: mongoURI,
+  file: (req, file) => {
+    return new Promise((res, rej) => {
+      const filename = `image-${Date.now()}${path.extname(file.originalname)}`;
+
+      const fileInfo = {
+        filename: filename,
+        bucketName: "images",
+      };
+
+      res(fileInfo);
+    });
+  },
+});
+
+const upload = multer({ storage });
+
+// For posts
+mongoose.connect(mongoURI, {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // api routes
 app.get("/", (req, res) => res.status(200).send("hello world"));
+app.post("/upload/image", upload.single("file"), (req, res) => {
+  res.status(201).send(req.file);
+});
 
 // listen port
 app.listen(port, () => console.log(`listening on localhost:${port}`));
