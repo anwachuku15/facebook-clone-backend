@@ -8,6 +8,8 @@ import bodyParser from "body-parser";
 import path from "path";
 import Pusher from "pusher";
 
+import mongoPosts from "./postModel";
+
 Grid.mongo = mongoose.mongo;
 // app config
 const app = express();
@@ -63,8 +65,21 @@ mongoose.connect(mongoURI, {
 
 // api routes
 app.get("/", (req, res) => res.status(200).send("hello world"));
+
 app.post("/upload/image", upload.single("file"), (req, res) => {
   res.status(201).send(req.file);
+});
+
+app.post("/upload/post", (req, res) => {
+  const dbPost = req.body;
+
+  mongoPosts.create(dbPost, (err, data) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(201).send(data);
+    }
+  });
 });
 
 // listen port
