@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // db config
-const mongoURI = MONGO_URI;
+const mongoURI = process.env.MONGO_URI;
 
 // For GridFS (images/videos)
 const connection = mongoose.createConnection(mongoURI, {
