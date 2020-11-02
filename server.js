@@ -1,4 +1,4 @@
-require("dotenv").config();
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -20,8 +20,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // db config
+dotenv.config();
 const mongoURI = process.env.MONGO_URI;
-
 // For GridFS (images/videos)
 const connection = mongoose.createConnection(mongoURI, {
   useCreateIndex: true,
