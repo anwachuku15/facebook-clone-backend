@@ -8,7 +8,7 @@ import bodyParser from "body-parser";
 import path from "path";
 import Pusher from "pusher";
 import { mongoURI as mURI } from "./secrets.js";
-import mongoPosts from "./postModel.js";
+import { getPosts, createPost } from "./handlers/posts.js";
 
 Grid.mongo = mongoose.mongo;
 // app config
@@ -22,7 +22,7 @@ app.use(cors());
 // db config
 const mongoURI = mURI;
 
-// For GridFS
+// For GridFS (images/videos)
 const connection = mongoose.createConnection(mongoURI, {
   useCreateIndex: true,
   useNewUrlParser: true,
@@ -55,7 +55,7 @@ const storage = new GridFsStorage({
 
 const upload = multer({ storage });
 
-// For posts
+// For Posts
 mongoose.connect(mongoURI, {
   useCreateIndex: true,
   useNewUrlParser: true,
@@ -69,14 +69,21 @@ app.post("/upload/image", upload.single("file"), (req, res) => {
   res.status(201).send(req.file);
 });
 
-app.post("/upload/post", (req, res) => {
-  const dbPost = req.body;
+app.post("/upload/post", createPost);
 
-  mongoPosts.create(dbPost, (err, data) => {
+app.get("/retrieve/posts", getPosts);
+
+app.get("/retrieve/images/single", (req, res) => {
+  gfs.files.findOne({ filename: req.query.name }, (err, file) => {
     if (err) {
       res.status(500).send(err);
     } else {
-      res.status(201).send(data);
+      if (!file || file.length === 0) {
+        res.status(404).json({ err: "file not found" });
+      } else {
+        const readstream = gfs.createReadStream(file.filename);
+        readstream.pipe(res);
+      }
     }
   });
 });
