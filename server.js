@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -7,20 +8,20 @@ import Grid from "gridfs-stream";
 import bodyParser from "body-parser";
 import path from "path";
 import Pusher from "pusher";
-import { mongoURI as mURI } from "./secrets.js";
 import { getPosts, createPost } from "./handlers/posts.js";
 
 Grid.mongo = mongoose.mongo;
 // app config
 const app = express();
 const port = process.env.PORT || 9000;
+dotenv.config();
 
 // middleware
 app.use(bodyParser.json());
 app.use(cors());
 
 // db config
-const mongoURI = mURI;
+const mongoURI = MONGO_URI;
 
 // For GridFS (images/videos)
 const connection = mongoose.createConnection(mongoURI, {
