@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+require("dotenv").config();
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -14,7 +14,6 @@ Grid.mongo = mongoose.mongo;
 // app config
 const app = express();
 const port = process.env.PORT || 9000;
-dotenv.config();
 
 // middleware
 app.use(bodyParser.json());
