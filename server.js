@@ -101,7 +101,7 @@ mongoose.connect(mongoURI, {
 });
 
 // api routes
-app.get("/", (req, res) => res.status(200).send(`${process.env.PUSHER_KEY}`));
+app.get("/", (req, res) => res.status(200).send("hello world"));
 
 app.post("/upload/image", upload.single("file"), (req, res) => {
   res.status(201).send(req.file);
