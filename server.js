@@ -15,6 +15,15 @@ Grid.mongo = mongoose.mongo;
 const app = express();
 const port = process.env.PORT || 9000;
 
+const { PUSHER_KEY, PUSHER_SECRET } = process.env;
+const pusher = new Pusher({
+  appId: "1101169",
+  key: "c7fd13149f9cdec61900",
+  secret: "c390e0ef56d4774a2c0a",
+  cluster: "us2",
+  useTLS: true,
+});
+
 // middleware
 app.use(bodyParser.json());
 app.use(cors());
@@ -27,6 +36,35 @@ const connection = mongoose.createConnection(mongoURI, {
   useCreateIndex: true,
   useNewUrlParser: true,
   useUnifiedTopology: true,
+});
+
+mongoose.connection.once("open", () => {
+  console.log("pusher & db connected");
+  const changeStream = mongoose.connection.collection("posts").watch();
+
+  changeStream.on("change", (change) => {
+    console.log(change);
+
+    if (change.operationType === "insert") {
+      console.log("Triggering Pusher...");
+      pusher
+        .trigger("posts", "inserted", {
+          change: change,
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .then(() => {
+          console.log("UPDATED");
+        })
+        .catch((err) => {
+          console.log("ERROR!!!!!");
+          console.log(err);
+        });
+    } else {
+      console.log("Error triggering Pusher");
+    }
+  });
 });
 
 let gfs;
@@ -63,7 +101,7 @@ mongoose.connect(mongoURI, {
 });
 
 // api routes
-app.get("/", (req, res) => res.status(200).send("hello world"));
+app.get("/", (req, res) => res.status(200).send(`${process.env.PUSHER_KEY}`));
 
 app.post("/upload/image", upload.single("file"), (req, res) => {
   res.status(201).send(req.file);
